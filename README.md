@@ -3,7 +3,7 @@
 ## 📌 Executive Summary
 During peak traffic events like Black Friday, e-commerce platforms experience massive surges in streaming clickstream and transactional data. When data is ingested naively as fragmented, uncompressed files, downstream analytical queries become slow, CPU-heavy, and financially expensive. 
 
-**Project ChaosLoad** bridges this gap by creating a local benchmarking environment. I simulated a high-volume data bottleneck by generating **5,000,000 rows** of transaction data split into hundreds of individual, raw JSON files. I then engineered a storage optimization layer that automatically compacts and converts this unstructured data into a high-performance, partitioned columnar format using **Apache Parquet** layouts.
+**Project High-Scale-Reality** bridges this gap by creating a local benchmarking environment. I simulated a high-volume data bottleneck by generating **5,000,000 rows** of transaction data split into hundreds of individual, raw JSON files. I then engineered a storage optimization layer that automatically compacts and converts this unstructured data into a high-performance, partitioned columnar format using **Apache Parquet** layouts.
 
 ## 📊 The Core Metrics (X → Y)
 By shifting from unorganized, row-oriented text storage to an optimized columnar data lake structure, the system achieved massive efficiency gains:
