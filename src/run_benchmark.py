@@ -1,10 +1,8 @@
 import time
-import psutil
 import os
 import duckdb
 
 def get_folder_size_mb(folder_path):
-    """Calculates total size of the folder in Megabytes."""
     total_size = 0
     for dirpath, dirnames, filenames in os.walk(folder_path):
         for f in filenames:
@@ -12,43 +10,44 @@ def get_folder_size_mb(folder_path):
             total_size += os.path.getsize(fp)
     return round(total_size / (1024 * 1024), 2)
 
-print("Starting Phase 1 Baseline Benchmark...")
-
-# 1. Measure the Storage Footprint
 raw_folder = "data/1_raw_json"
-folder_size = get_folder_size_mb(raw_folder)
-print(f" Total files on disk: {len(os.listdir(raw_folder))} files")
-print(f" Total raw data size: {folder_size} MB")
+optimized_folder = "data/2_optimized_parquet"
 
-# 2. Prepare the Heavy Analytical SQL Query
-# This query calculates total sales and total successful transactions per product category
-query = """
-    SELECT 
-        category,
-        ROUND(SUM(price), 2) as total_revenue,
-        COUNT(*) as total_transactions,
-        COUNT(CASE WHEN payment_status = 'success' THEN 1 END) as successful_transactions
+raw_size = get_folder_size_mb(raw_folder)
+optimized_size = get_folder_size_mb(optimized_folder)
+
+# 1. RUN THE SLOW BENCHMARK (JSON)
+query_json = """
+    SELECT category, ROUND(SUM(price), 2) as total_revenue, COUNT(*) as total_transactions
     FROM 'data/1_raw_json/*.json'
-    GROUP BY category
-    ORDER BY total_revenue DESC;
+    GROUP BY category ORDER BY total_revenue DESC;
 """
+start = time.time()
+duckdb.execute(query_json).fetchall()
+time_json = round(time.time() - start, 4)
 
-print("\n Running heavy analytical query over thousands of unorganized JSONs...")
+# 2. RUN THE FAST BENCHMARK (PARQUET)
+# Notice how we query the whole directory structure natively!
+query_parquet = """
+    SELECT category, ROUND(SUM(price), 2) as total_revenue, COUNT(*) as total_transactions
+    FROM 'data/2_optimized_parquet/**/*.parquet'
+    GROUP BY category ORDER BY total_revenue DESC;
+"""
+start = time.time()
+duckdb.execute(query_parquet).fetchall()
+time_parquet = round(time.time() - start, 4)
 
-# Record the exact start time
-start_time = time.time()
+# 3. PRINT THE COMPARISON REPORT
+print("\n --- THE ULTIMATE FAANG RECRUITER METRICS REPORT --- ")
+print("-" * 55)
+print(f" METRIC               | BEFORE (JSON) | AFTER (PARQUET)")
+print("-" * 55)
+print(f" Storage Footprint    | {raw_size:<13} MB | {optimized_size:<12} MB")
+print(f"  Query Execution Time | {time_json:<13} sec| {time_parquet:<12} sec")
+print("-" * 55)
 
-# Execute the query using DuckDB
-result = duckdb.execute(query).fetchall()
-
-# Record the exact end time
-end_time = time.time()
-execution_time = round(end_time - start_time, 4)
-
-# Print the results
-print("\n --- QUERY RESULTS ---")
-for row in result:
-    print(f"Category: {row[0]:<18} | Revenue: ${row[1]:<12} | Total Tx: {row[2]:<8} | Success Tx: {row[3]}")
-
-print("------------------------")
-print(f"\n  BASELINE METRIC (X): Query Execution Time = {execution_time} seconds")
+space_saved = round(((raw_size - optimized_size) / raw_size) * 100, 2)
+speedup = round((time_json / time_parquet), 1) if time_parquet > 0 else 0
+print(f" Data Compression: Saved {space_saved}% disk space!")
+print(f" Performance Boost: Query runs {speedup}x FASTER!")
+print("-" * 55)
