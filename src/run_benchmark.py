@@ -12,7 +12,7 @@ def get_folder_size_mb(folder_path):
             total_size += os.path.getsize(fp)
     return round(total_size / (1024 * 1024), 2)
 
-print("🔍 Starting Phase 1 Baseline Benchmark...")
+print("Starting Phase 1 Baseline Benchmark...")
 
 # 1. Measure the Storage Footprint
 raw_folder = "data/1_raw_json"
@@ -33,7 +33,7 @@ query = """
     ORDER BY total_revenue DESC;
 """
 
-print("\n🏋️ Running heavy analytical query over thousands of unorganized JSONs...")
+print("\n Running heavy analytical query over thousands of unorganized JSONs...")
 
 # Record the exact start time
 start_time = time.time()
