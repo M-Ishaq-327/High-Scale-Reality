@@ -38,7 +38,7 @@ duckdb.execute(query_parquet).fetchall()
 time_parquet = round(time.time() - start, 4)
 
 # 3. PRINT THE COMPARISON REPORT
-print("\n --- THE ULTIMATE FAANG RECRUITER METRICS REPORT --- ")
+print("\n --- THE ULTIMATE METRICS REPORT --- ")
 print("-" * 55)
 print(f" METRIC               | BEFORE (JSON) | AFTER (PARQUET)")
 print("-" * 55)
